@@ -8,9 +8,9 @@
 
 using namespace std;
 
-vector<Delivery> simulate(Data &data)
+vector<OutputForm> simulate(Data &data)
 {	
-	vector<Delivery> deliveries;
+	vector<OutputForm> deliveries;
 
 	int teams_of_4_left = data.teams_of_4;
 	int teams_of_3_left = data.teams_of_3;
@@ -75,7 +75,7 @@ int main()
 		Data data(in_prefix + (*in_file_it));
 		cout << ". Input processed.\n";
 
-		vector<Delivery> result = simulate(data);
+		vector<OutputForm> result = simulate(data);
 
 		string out_filename = out_prefix + (*in_file_it).substr(0, ((*in_file_it).find('.'))) + ".out";
 		data.write_to_file(out_filename, result);
