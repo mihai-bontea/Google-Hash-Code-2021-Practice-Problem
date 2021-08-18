@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <algorithm>
 #include "Data.h"
-#define NR_ITERATED_BACK 10
+#define NR_ITERATED_BACK 15
 
 using namespace std;
 
@@ -19,7 +19,7 @@ void backtrack(Delivery &delivery, int current_step, int steps, Delivery &best_d
 			continue;
 
 		//new_delivery.add_pizza(it, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
-		delivery.replace_index(it, current_step - 1, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+		delivery.replace_index(it, current_step - 1);
 		if (current_step < steps)
 			backtrack(delivery, current_step + 1, steps, best_delivery, data, true_range, i);
 		else
@@ -39,14 +39,14 @@ Delivery get_best_delivery(Delivery delivery, int delivery_size, Data &data, int
 	{
 		auto it = data.pizzas.end();
 		--it;
-		result.add_pizza(it, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+		result.add_pizza(it);
 
 		
 		for (int i = 1; i < true_range; ++i)
 		{
 			--it;
-			if (result.replace_profit(it, 1, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr) > 0)
-				result.replace_index(it, 1, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+			if (result.replace_profit(it, 1) > 0)
+				result.replace_index(it, 1);
 		}
 	}
 	else
@@ -100,7 +100,6 @@ vector<OutputForm> simulate(Data &data)
 		}
 		*/
 		
-
 		double best_score = max(max(best_of_2.score, best_of_3.score), best_of_4.score);
 		Delivery final_delivery;
 		if (best_of_2.score == best_score && teams_of_2_left)
