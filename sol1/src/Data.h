@@ -282,4 +282,9 @@ public:
 		}
 		cout << "The final delivery score is: " << total_score_external << "\n\n";
 	}
+
+	~Data()
+	{
+		delete[] ingr_rarity;
+	}
 };

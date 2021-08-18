@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <bitset>
+#define MAX_UNIQUE_INGR 10001
 
 using namespace std;
 
@@ -44,24 +45,18 @@ class Pizza
 public:
 
 	int nr_ingredients;
-	bool *ingr_is_present;
+	bitset<MAX_UNIQUE_INGR> ingr_is_present;
 	int initial_index;
 	int total_unique_ingredients;
 	double score;
 
-	Pizza() : nr_ingredients{ 0 }, ingr_is_present{ NULL }, initial_index{ -1 }, score{ -1 }, total_unique_ingredients{ 0 }
+	Pizza() : nr_ingredients{ 0 }, initial_index{ -1 }, score{ -1 }, total_unique_ingredients{ 0 }
 	{
 	}
 
 	Pizza(const PrePizza &base, map<string, int> &ingr_to_num, int total_unique_ingredients, int index, const int *ingr_rarity, int total_ingr_count) :
 		nr_ingredients{ base.nr_ingredients }, initial_index{ index }, total_unique_ingredients{ total_unique_ingredients }
 	{
-		//nr_ingredients = base.nr_ingredients;
-		//initial_index = index;
-		//this->total_unique_ingredients = total_unique_ingredients;
-		ingr_is_present = new bool[total_unique_ingredients];
-		memset(ingr_is_present, 0, total_unique_ingredients);
-
 		int rarity_sum = 0;
 		for (int index = 0; index < nr_ingredients; ++index)
 		{
@@ -78,10 +73,8 @@ public:
 	Pizza(const Pizza &other) :
 		nr_ingredients{ other.nr_ingredients }, initial_index{ other.initial_index }, total_unique_ingredients{ other.total_unique_ingredients }
 	{
-		this->ingr_is_present = new bool[total_unique_ingredients];
+		this->ingr_is_present = other.ingr_is_present;
 		this->score = other.score;
-		for (int index = 0; index < total_unique_ingredients; ++index)
-			this->ingr_is_present[index] = other.ingr_is_present[index];
 	}
 
 	Pizza &operator=(const Pizza &other)
@@ -89,11 +82,10 @@ public:
 		this->nr_ingredients = other.nr_ingredients;
 		this->initial_index = other.initial_index;
 		this->total_unique_ingredients = other.total_unique_ingredients;
+
+		this->ingr_is_present = other.ingr_is_present;
 		this->score = other.score;
 
-		this->ingr_is_present = new bool[total_unique_ingredients];
-		for (int index = 0; index < total_unique_ingredients; ++index)
-			this->ingr_is_present[index] = other.ingr_is_present[index];
 		return *this;
 	}
 
@@ -106,19 +98,13 @@ public:
 	{
 		return (this->initial_index != rhs.initial_index);
 	}
-
-	~Pizza()
-	{
-		if (ingr_is_present != NULL)
-			delete[] ingr_is_present;
-	}
 };
 
 class Delivery
 {
 public:
 	int nr_pizzas, nr_ingredients;
-	int *ingr_is_present;
+	char *ingr_is_present;
 	list<Pizza>::iterator pos_in_list[4];
 	Pizza pizzas[4];
 	double score;
@@ -138,7 +124,7 @@ public:
 
 		nr_ingredients = (*first_pizza_it).nr_ingredients;
 		nr_pizzas = 1;
-		ingr_is_present = new int[total_unique_ingredients];
+		ingr_is_present = new char[total_unique_ingredients];
 
 		// Initializing the ingr freq array with the ingredients of the starting pizza
 		for (int ingr_index = 0; ingr_index < total_unique_ingredients; ++ingr_index)
@@ -198,8 +184,9 @@ public:
 
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
-			ingr_is_present[ingr_index] -= (pizzas[replace_index].ingr_is_present[ingr_index] +
+			ingr_is_present[ingr_index] -= (pizzas[replace_index].ingr_is_present[ingr_index] -
 				(*pizza_it).ingr_is_present[ingr_index]);
+			assert(ingr_is_present[ingr_index] >= 0);
 
 			if (ingr_is_present[ingr_index])
 			{
@@ -234,7 +221,7 @@ public:
 			this->pos_in_list[i] = other.pos_in_list[i];
 		}
 
-		this->ingr_is_present = new int[other.pizzas[0].total_unique_ingredients];
+		this->ingr_is_present = new char[other.pizzas[0].total_unique_ingredients];
 		for (int ingr_index = 0; ingr_index < other.pizzas[0].total_unique_ingredients; ++ingr_index)
 			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
 	}
@@ -251,7 +238,7 @@ public:
 			this->pos_in_list[i] = other.pos_in_list[i];
 		}
 
-		this->ingr_is_present = new int[other.pizzas[0].total_unique_ingredients];
+		this->ingr_is_present = new char[other.pizzas[0].total_unique_ingredients];
 		for (int ingr_index = 0; ingr_index < other.pizzas[0].total_unique_ingredients; ++ingr_index)
 			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
 
@@ -268,6 +255,22 @@ public:
 	{
 		if (ingr_is_present != NULL)
 			delete[] ingr_is_present;
+	}
+};
+
+class OutputForm
+{
+public:
+	int nr_pizzas, nr_ingredients;
+	int pizza_indices[4];
+
+	OutputForm(Delivery &delivery)
+	{
+		this->nr_pizzas = delivery.nr_pizzas;
+		//cout << this->nr_pizzas << endl;
+		this->nr_ingredients = delivery.nr_ingredients;
+		for (int i = 0; i < nr_pizzas; ++i)
+			this->pizza_indices[i] = delivery.pizzas[i].initial_index;
 	}
 };
 
@@ -330,7 +333,8 @@ public:
 		sort(temp.begin(), temp.end(),
 			[](const Pizza &a, const Pizza &b) -> bool
 		{
-			return a.score > b.score;
+			//return a.score > b.score;
+			return a.score < b.score;
 		});
 
 		// Create a list with the sorted elements
@@ -339,7 +343,7 @@ public:
 		pizzas = move(pizzas_unused);
 	}
 
-	void write_to_file(string filename, vector<Delivery> &deliveries)
+	void write_to_file(string filename, vector<OutputForm> &deliveries)
 	{
 		ofstream fout(filename);
 		unsigned long long total_score_external = 0;
@@ -351,9 +355,14 @@ public:
 
 			fout << deliveries[index].nr_pizzas << " ";
 			for (int p_index = 0; p_index < deliveries[index].nr_pizzas; ++p_index)
-				fout << deliveries[index].pizzas[p_index].initial_index << " ";
+				fout << deliveries[index].pizza_indices[p_index] << " ";
 			fout << '\n';
 		}
 		cout << "The final delivery score is: " << total_score_external << "\n\n";
+	}
+
+	~Data()
+	{
+		delete[] ingr_rarity;
 	}
 };

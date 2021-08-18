@@ -55,9 +55,9 @@ Delivery get_best_delivery(Delivery delivery, int delivery_size, Data &data, int
 	return result;
 }
 
-vector<Delivery> simulate(Data &data)
+vector<OutputForm> simulate(Data &data)
 {
-	vector<Delivery> deliveries;
+	vector<OutputForm> deliveries;
 
 	int teams_of_4_left = data.teams_of_4;
 	int teams_of_3_left = data.teams_of_3;
@@ -83,7 +83,24 @@ vector<Delivery> simulate(Data &data)
 		assert(best_of_3.nr_pizzas == 0 || best_of_3.nr_pizzas == 3);
 		assert(best_of_4.nr_pizzas == 0 || best_of_4.nr_pizzas == 4);
 
-		//cout << best_of_2.score << " " << best_of_3.score << " " << best_of_4.score << endl;
+		/*
+		cout << best_of_2.score << " " << best_of_3.score << " " << best_of_4.score << endl;
+		if (best_of_2.score == best_of_3.score && best_of_2.score != 0)
+		{
+			for (int i = 0; i < data.total_unique_ingr; ++i)
+				cout << (int)best_of_2.ingr_is_present[i] << " ";
+			cout << endl;
+
+			for (int i = 0; i < data.total_unique_ingr; ++i)
+				cout << (int)best_of_3.ingr_is_present[i] << " ";
+			cout << endl;
+
+			for (int i = 0; i < data.total_unique_ingr; ++i)
+				cout << (int)best_of_4.ingr_is_present[i] << " ";
+			cout << endl;
+		}
+		*/
+		
 
 		double best_score = max(max(best_of_2.score, best_of_3.score), best_of_4.score);
 		Delivery final_delivery;
@@ -115,9 +132,10 @@ vector<Delivery> simulate(Data &data)
 		if (final_delivery.score != 0)
 			deliveries.push_back(final_delivery);
 
-		final_delivery.release_memory();
+		//final_delivery.release_memory();
 	}
 
+	cout << "We have " << data.pizzas.size() << " leftover pizzas...\n";
 	return deliveries;
 }
 
@@ -125,15 +143,18 @@ int main()
 {
 	const string in_prefix = "../../input_files/";
 	const string out_prefix = "../../output_files/sol2/";
-	vector<string> input_files = { "a_example.in", "b_little_bit_of_everything.in", "d_many_pizzas.in" };
+	vector<string> input_files = { "a_example.in", "b_little_bit_of_everything.in", "c_many_ingredients.in", "d_many_pizzas.in", "e_many_teams.in" };
 
 	for (auto in_file_it = input_files.begin(); in_file_it != input_files.end(); ++in_file_it)
 	{
+		//if ((*in_file_it) != "e_many_teams.in")
+			//continue;
+
 		cout << "Now working on " << (*in_file_it);
 		Data data(in_prefix + (*in_file_it));
 		cout << ". Input processed.\n";
 
-		vector<Delivery> result = simulate(data);
+		vector<OutputForm> result = simulate(data);
 
 		string out_filename = out_prefix + (*in_file_it).substr(0, ((*in_file_it).find('.'))) + ".out";
 		data.write_to_file(out_filename, result);
