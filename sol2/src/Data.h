@@ -108,7 +108,7 @@ public:
 	{
 		pizzas[0] = *(first_pizza_it);
 		pos_in_list[0] = first_pizza_it;
-
+		
 		ingr_is_present = new char[total_unique_ingr];
 
 		// Initializing the ingr freq array with the ingredients of the starting pizza
@@ -123,16 +123,19 @@ public:
 		++(this->nr_pizzas);
 
 		nr_ingredients = 0;
-
+		
+		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
 			ingr_is_present[ingr_index] += (*pizza_it).ingr_is_present[ingr_index];
 
 			if (ingr_is_present[ingr_index])
 				++nr_ingredients;
+
+			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
 		}
 
-		//score = ((double)rarity_sum / total_ingr_count * total_unique_ingr) * 0.25 + nr_ingredients * 0.75;
+		score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
 	}
 
 	double replace_profit(list<Pizza>::iterator pizza_it, int replace_index)
@@ -140,6 +143,7 @@ public:
 		int new_nr_ingredients = 0;
 		double new_score = 0;
 
+		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
 			bool ingr_exists = ((ingr_is_present[ingr_index] - pizzas[replace_index].ingr_is_present[ingr_index] +
@@ -147,10 +151,12 @@ public:
 
 			if (ingr_exists)
 				++new_nr_ingredients;
+
+			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
 		}
 
-		//new_score = ((double)rarity_sum / total_ingr_count * total_unique_ingr) * 0.25 + nr_ingredients * 0.75;
-
+		new_score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
+		
 		return new_score - score;
 	}
 
@@ -167,6 +173,7 @@ public:
 
 		nr_ingredients = 0;
 
+		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
 			ingr_is_present[ingr_index] -= (pizzas[replace_index].ingr_is_present[ingr_index] -
@@ -175,9 +182,10 @@ public:
 
 			if (ingr_is_present[ingr_index])
 				++nr_ingredients;
-		}
 
-		//score = ((double)rarity_sum / total_ingr_count * total_unique_ingr) * 0.25 + nr_ingredients * 0.75;
+			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
+		}
+		score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
 	}
 
 	bool in_delivery(const Pizza &pizza)
@@ -191,19 +199,21 @@ public:
 	Delivery(const Delivery &other): nr_pizzas{other.nr_pizzas}, nr_ingredients{other.nr_ingredients}, score{other.score},
 		total_unique_ingr{other.total_unique_ingr}
 	{
+		assert(other.ingr_is_present != NULL);
 		for (int index = 0; index < nr_pizzas; ++index)
 		{
 			this->pizzas[index] = other.pizzas[index];
 			this->pos_in_list[index] = other.pos_in_list[index];
 		}
-
 		this->ingr_is_present = new char[total_unique_ingr];
+	
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
 	}
 
 	Delivery &operator=(const Delivery &other)
 	{
+		assert(other.ingr_is_present != NULL);
 		this->nr_pizzas = other.nr_pizzas;
 		this->nr_ingredients = other.nr_ingredients;
 		this->score = other.score;
@@ -214,8 +224,10 @@ public:
 			this->pizzas[index] = other.pizzas[index];
 			this->pos_in_list[index] = other.pos_in_list[index];
 		}
+		// Alocate memory only if needed(all deliveries allocate the same size)
+		if (this->ingr_is_present == NULL)
+			this->ingr_is_present = new char[total_unique_ingr];
 
-		this->ingr_is_present = new char[total_unique_ingr];
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
 
@@ -289,8 +301,7 @@ public:
 		sort(temp.begin(), temp.end(),
 			[](const Pizza &a, const Pizza &b) -> bool
 		{
-			//return a.score > b.score;
-			return a.nr_ingredients < b.nr_ingredients;
+			return a.nr_ingredients > b.nr_ingredients;
 		});
 
 		// Create a list with the sorted elements

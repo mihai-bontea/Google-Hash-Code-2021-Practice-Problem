@@ -5,27 +5,29 @@
 #include <Windows.h>
 #include <algorithm>
 #include "Data.h"
-#define NR_ITERATED_BACK 15
+#define NR_ITERATED_BACK 11
 
 using namespace std;
 
-void backtrack(Delivery &delivery, int current_step, int steps, Delivery &best_delivery, Data &data, int true_range, int last_index)
+void backtrack(Delivery &delivery, int current_step, int nr_steps, Delivery &best_delivery, Data &data, int true_range, int last_index)
 {
-	auto it = data.pizzas.end();
+	auto it = data.pizzas.begin();
+	bool first_time = true;
 	for (int i = 0; i < true_range; ++i)
 	{
-		--it;
+		++it;
+		// Ignore pizzas with an index smaller than the current one(we want combinations, not permutations)
 		if (i <= last_index)
 			continue;
 
-		//new_delivery.add_pizza(it, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
 		delivery.replace_index(it, current_step - 1);
-		if (current_step < steps)
-			backtrack(delivery, current_step + 1, steps, best_delivery, data, true_range, i);
+		if (current_step < nr_steps)
+			backtrack(delivery, current_step + 1, nr_steps, best_delivery, data, true_range, i);
 		else
 		{
-			if (delivery.score >= best_delivery.score)
+			if (delivery.score >= best_delivery.score || first_time)
 				best_delivery = delivery;
+			first_time = false;
 		}
 	}
 }
@@ -33,21 +35,22 @@ void backtrack(Delivery &delivery, int current_step, int steps, Delivery &best_d
 Delivery get_best_delivery(Delivery delivery, int delivery_size, Data &data, int range)
 {
 	int true_range = min((data.pizzas.size() - 1), range);
-	Delivery result = delivery;
+	Delivery result;
 
 	if (delivery_size == 2)
 	{
-		auto it = data.pizzas.end();
-		--it;
+		result = delivery;
+		auto it = data.pizzas.begin();
+		++it;
 		result.add_pizza(it);
-
 		
 		for (int i = 1; i < true_range; ++i)
 		{
-			--it;
+			++it;
 			if (result.replace_profit(it, 1) > 0)
 				result.replace_index(it, 1);
 		}
+
 	}
 	else
 		backtrack(delivery, 2, delivery_size, result, data, true_range, -1);
@@ -129,8 +132,6 @@ vector<OutputForm> simulate(Data &data)
 		// Adding best delivery to list
 		if (final_delivery.score != 0)
 			deliveries.push_back(final_delivery);
-
-		//final_delivery.release_memory();
 	}
 
 	cout << "We have " << data.pizzas.size() << " leftover pizzas...\n";
@@ -145,7 +146,7 @@ int main()
 
 	for (auto in_file_it = input_files.begin(); in_file_it != input_files.end(); ++in_file_it)
 	{
-		//if ((*in_file_it) != "e_many_teams.in")
+		//if ((*in_file_it) != "d_many_pizzas.in")
 			//continue;
 
 		cout << "Now working on " << (*in_file_it);

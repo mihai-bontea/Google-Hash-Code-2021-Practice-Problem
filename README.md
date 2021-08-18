@@ -21,9 +21,9 @@
 
 #### Score
 
-* *a_example.in*: 52
-* *b_little_bit_of_everything.in*: 9654
-* *c_many_ingredients.in*: 
-* *d_many_pizzas.in*: 4386384
-* *e_many_teams.in*: 5071446 vs 8484242
-* **total score**: 5071429
+* *a_example.in*: 61
+* *b_little_bit_of_everything.in*: 8077
+* *c_many_ingredients.in*: 723442211
+* *d_many_pizzas.in*: 5891846
+* *e_many_teams.in*: 8373656
+* **total score**: 
