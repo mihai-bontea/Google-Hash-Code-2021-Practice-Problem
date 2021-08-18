@@ -131,7 +131,7 @@ public:
 			ingr_is_present[ingr_index] = pizzas[0].ingr_is_present[ingr_index];
 	}
 
-	void add_pizza(list<Pizza>::iterator pizza_it, int total_unique_ingredients, const int *ingr_rarity, int total_ingr_count, int total_unique_ingr)
+	void add_pizza(list<Pizza>::iterator pizza_it, const int *ingr_rarity, int total_ingr_count, int total_unique_ingr)
 	{
 		pizzas[nr_pizzas] = *(pizza_it);
 		pos_in_list[nr_pizzas] = pizza_it;
@@ -140,7 +140,7 @@ public:
 		int rarity_sum = 0;
 		nr_ingredients = 0;
 
-		for (int ingr_index = 0; ingr_index < total_unique_ingredients; ++ingr_index)
+		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
 			ingr_is_present[ingr_index] += (*pizza_it).ingr_is_present[ingr_index];
 
@@ -179,6 +179,12 @@ public:
 
 	void replace_index(list<Pizza>::iterator pizza_it, int replace_index, const int *ingr_rarity, int total_ingr_count, int total_unique_ingr)
 	{
+		if (replace_index == nr_pizzas)
+		{
+			add_pizza(pizza_it, ingr_rarity, total_ingr_count, total_unique_ingr);
+			return;
+		}
+
 		nr_ingredients = 0;
 		int rarity_sum = 0;
 

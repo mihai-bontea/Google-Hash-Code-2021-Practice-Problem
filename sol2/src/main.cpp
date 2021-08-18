@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void backtrack(Delivery delivery, int current_step, int steps, Delivery &best_delivery, Data &data, int true_range, int last_index)
+void backtrack(Delivery &delivery, int current_step, int steps, Delivery &best_delivery, Data &data, int true_range, int last_index)
 {
 	auto it = data.pizzas.end();
 	for (int i = 0; i < true_range; ++i)
@@ -18,15 +18,14 @@ void backtrack(Delivery delivery, int current_step, int steps, Delivery &best_de
 		if (i <= last_index)
 			continue;
 
-		Delivery new_delivery = delivery;
-		new_delivery.add_pizza(it, data.total_unique_ingr, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+		//new_delivery.add_pizza(it, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+		delivery.replace_index(it, current_step - 1, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
 		if (current_step < steps)
-			backtrack(new_delivery, current_step + 1, steps, best_delivery, data, true_range, i);
+			backtrack(delivery, current_step + 1, steps, best_delivery, data, true_range, i);
 		else
 		{
-			if (new_delivery.score >= best_delivery.score) {
-				best_delivery = new_delivery;
-			}
+			if (delivery.score >= best_delivery.score)
+				best_delivery = delivery;
 		}
 	}
 }
@@ -40,7 +39,7 @@ Delivery get_best_delivery(Delivery delivery, int delivery_size, Data &data, int
 	{
 		auto it = data.pizzas.end();
 		--it;
-		result.add_pizza(it, data.total_unique_ingr, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
+		result.add_pizza(it, data.ingr_rarity, data.total_ingr_count, data.total_unique_ingr);
 
 		
 		for (int i = 1; i < true_range; ++i)
