@@ -1,3 +1,4 @@
+
 # Google Hash Code 2021 Practice Problem
 
 ## Representing the data

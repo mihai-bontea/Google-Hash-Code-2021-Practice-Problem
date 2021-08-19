@@ -94,27 +94,19 @@ class Delivery
 {
 public:
 	int nr_pizzas, nr_ingredients, total_unique_ingr;
-	char *ingr_is_present;
 	list<Pizza>::iterator pos_in_list[4];
 	Pizza pizzas[4];
 	double score;
 
-	Delivery(): nr_pizzas{0}, nr_ingredients{0}, score{0}, total_unique_ingr{0}
+	Delivery() : nr_pizzas{ 0 }, nr_ingredients{ 0 }, score{ 0 }, total_unique_ingr{ 0 }
 	{
-		ingr_is_present = NULL;
 	}
 
-	Delivery(list<Pizza>::iterator first_pizza_it, int total_unique_ingr): nr_pizzas{1}, nr_ingredients{(*first_pizza_it).nr_ingredients}, 
-		score{(double)(*first_pizza_it).nr_ingredients}, total_unique_ingr{total_unique_ingr}
+	Delivery(list<Pizza>::iterator first_pizza_it, int total_unique_ingr) : nr_pizzas{ 1 }, nr_ingredients{ (*first_pizza_it).nr_ingredients },
+		score{ (double)(*first_pizza_it).nr_ingredients }, total_unique_ingr{ total_unique_ingr }
 	{
 		pizzas[0] = *(first_pizza_it);
 		pos_in_list[0] = first_pizza_it;
-		
-		ingr_is_present = new char[total_unique_ingr];
-
-		// Initializing the ingr freq array with the ingredients of the starting pizza
-		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
-			ingr_is_present[ingr_index] = pizzas[0].ingr_is_present[ingr_index];
 	}
 
 	void add_pizza(list<Pizza>::iterator pizza_it)
@@ -124,17 +116,20 @@ public:
 		++(this->nr_pizzas);
 
 		nr_ingredients = 0;
-		
+
 		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
-			ingr_is_present[ingr_index] += (*pizza_it).ingr_is_present[ingr_index];
+			int ingr_count = 0;
+			for (int pizza_index = 0; pizza_index < nr_pizzas; ++pizza_index)
+				ingr_count += pizzas[pizza_index].ingr_is_present[ingr_index];
 
-			if (ingr_is_present[ingr_index])
+			if (ingr_count)
 				++nr_ingredients;
 
-			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
+			nr_ingredients_wasted += ((ingr_count <= 1) ? 0 : ingr_count - 1);
 		}
+
 		score = (double)nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
 	}
 
@@ -146,8 +141,11 @@ public:
 		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
-			int ingr_count = (ingr_is_present[ingr_index] - pizzas[replace_index].ingr_is_present[ingr_index] +
-				(*pizza_it).ingr_is_present[ingr_index]);
+			int ingr_count = 0;
+			for (int pizza_index = 0; pizza_index < nr_pizzas; ++pizza_index)
+				ingr_count += pizzas[pizza_index].ingr_is_present[ingr_index];
+			ingr_count -= pizzas[replace_index].ingr_is_present[ingr_index];
+			ingr_count += (*pizza_it).ingr_is_present[ingr_index];
 
 			if (ingr_count)
 				++new_nr_ingredients;
@@ -156,7 +154,6 @@ public:
 		}
 
 		new_score = (double)new_nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
-		
 		return new_score - score;
 	}
 
@@ -168,21 +165,22 @@ public:
 			return;
 		}
 
+		pizzas[replace_index] = (*pizza_it);
+		pos_in_list[replace_index] = pizza_it;
+
 		nr_ingredients = 0;
 		int nr_ingredients_wasted = 0;
 		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
 		{
-			ingr_is_present[ingr_index] -= (pizzas[replace_index].ingr_is_present[ingr_index] -
-				(*pizza_it).ingr_is_present[ingr_index]);
+			int ingr_count = 0;
+			for (int pizza_index = 0; pizza_index < nr_pizzas; ++pizza_index)
+				ingr_count += pizzas[pizza_index].ingr_is_present[ingr_index];
 
-			if (ingr_is_present[ingr_index])
+			if (ingr_count)
 				++nr_ingredients;
-
-			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
+			
+			nr_ingredients_wasted += ((ingr_count <= 1) ? 0 : ingr_count - 1);
 		}
-		pizzas[replace_index] = (*pizza_it);
-		pos_in_list[replace_index] = pizza_it;
-
 		score = (double)nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
 	}
 
@@ -194,24 +192,18 @@ public:
 		return false;
 	}
 
-	Delivery(const Delivery &other): nr_pizzas{other.nr_pizzas}, nr_ingredients{other.nr_ingredients}, score{other.score},
-		total_unique_ingr{other.total_unique_ingr}
+	Delivery(const Delivery &other) : nr_pizzas{ other.nr_pizzas }, nr_ingredients{ other.nr_ingredients }, score{ other.score },
+		total_unique_ingr{ other.total_unique_ingr }
 	{
-		assert(other.ingr_is_present != NULL);
 		for (int index = 0; index < nr_pizzas; ++index)
 		{
 			this->pizzas[index] = other.pizzas[index];
 			this->pos_in_list[index] = other.pos_in_list[index];
 		}
-		this->ingr_is_present = new char[total_unique_ingr];
-	
-		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
-			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
 	}
 
 	Delivery &operator=(const Delivery &other)
 	{
-		assert(other.ingr_is_present != NULL);
 		this->nr_pizzas = other.nr_pizzas;
 		this->nr_ingredients = other.nr_ingredients;
 		this->score = other.score;
@@ -222,20 +214,7 @@ public:
 			this->pizzas[index] = other.pizzas[index];
 			this->pos_in_list[index] = other.pos_in_list[index];
 		}
-		// Alocate memory only if needed(all deliveries allocate the same size)
-		if (this->ingr_is_present == NULL)
-			this->ingr_is_present = new char[total_unique_ingr];
-
-		for (int ingr_index = 0; ingr_index < total_unique_ingr; ++ingr_index)
-			this->ingr_is_present[ingr_index] = other.ingr_is_present[ingr_index];
-
 		return *this;
-	}
-
-	~Delivery()
-	{
-		if (ingr_is_present != NULL)
-			delete[] ingr_is_present;
 	}
 };
 
@@ -248,7 +227,6 @@ public:
 	OutputForm(Delivery &delivery)
 	{
 		this->nr_pizzas = delivery.nr_pizzas;
-		//cout << this->nr_pizzas << endl;
 		this->nr_ingredients = delivery.nr_ingredients;
 		for (int i = 0; i < nr_pizzas; ++i)
 			this->pizza_indices[i] = delivery.pizzas[i].initial_index;
