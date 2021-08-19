@@ -9,6 +9,7 @@
 #include <cmath>
 #include <bitset>
 #define MAX_UNIQUE_INGR 10001
+#define MAGIC_NUMBER 0.67
 
 using namespace std;
 
@@ -135,7 +136,7 @@ public:
 			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
 		}
 
-		score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
+		score = (double)nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
 	}
 
 	double replace_profit(list<Pizza>::iterator pizza_it, int replace_index)
@@ -155,7 +156,7 @@ public:
 			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
 		}
 
-		new_score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
+		new_score = (double)nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
 		
 		return new_score - score;
 	}
@@ -185,7 +186,7 @@ public:
 
 			nr_ingredients_wasted += ((ingr_is_present[ingr_index] <= 1) ? 0 : ingr_is_present[ingr_index] - 1);
 		}
-		score = (double)nr_ingredients - (nr_ingredients_wasted * 0.5);
+		score = (double)nr_ingredients - (nr_ingredients_wasted * MAGIC_NUMBER);
 	}
 
 	bool in_delivery(const Pizza &pizza)
