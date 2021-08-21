@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <algorithm>
 #include "Data.h"
-#define NR_ITERATED_BACK 11
+#define NR_ITERATED_BACK 10
 
 using namespace std;
 
@@ -43,7 +43,7 @@ Delivery get_best_delivery(Delivery delivery, int delivery_size, Data &data, int
 		auto it = data.pizzas.begin();
 		++it;
 		result.add_pizza(it);
-		
+
 		for (int i = 1; i < true_range; ++i)
 		{
 			++it;
@@ -69,7 +69,7 @@ vector<OutputForm> simulate(Data &data)
 	{
 		// Starting a delivery with the first element in the list
 		Delivery delivery(data.pizzas.begin(), data.total_unique_ingr);
-		
+
 		Delivery best_of_2, best_of_3, best_of_4;
 
 		if (teams_of_2_left)
@@ -84,7 +84,7 @@ vector<OutputForm> simulate(Data &data)
 		assert(best_of_2.nr_pizzas == 0 || best_of_2.nr_pizzas == 2);
 		assert(best_of_3.nr_pizzas == 0 || best_of_3.nr_pizzas == 3);
 		assert(best_of_4.nr_pizzas == 0 || best_of_4.nr_pizzas == 4);
-		
+
 		double best_score = max(max(best_of_2.score, best_of_3.score), best_of_4.score);
 		Delivery final_delivery;
 		if (best_of_2.score == best_score && teams_of_2_left)
@@ -105,12 +105,15 @@ vector<OutputForm> simulate(Data &data)
 		else
 		{
 			cout << "ERROR" << endl;
+			cout << best_of_2.score << " " << best_of_3.score << " " << best_of_4.score << best_score << endl;
+			//cout << teams_of_2_left << " " << teams_of_3_left << " " << teams_of_4_left << endl;
+			cout << best_of_3.pizzas[0].nr_ingredients << "  " << best_of_3.pizzas[1].nr_ingredients << " " << best_of_3.pizzas[2].nr_ingredients << endl;
 		}
 
 		// Removing the selected pizzas from the list
 		for (int i = 0; i < final_delivery.nr_pizzas; ++i)
-			data.pizzas.erase(final_delivery.pos_in_list[i]);		
-	
+			data.pizzas.erase(final_delivery.pos_in_list[i]);
+
 		// Adding best delivery to list
 		if (final_delivery.score != 0)
 			deliveries.push_back(final_delivery);
