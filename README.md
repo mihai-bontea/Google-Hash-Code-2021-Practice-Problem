@@ -25,6 +25,21 @@ you will get. For this attempt, I set it to **10**. The score for each delivery 
 * *c_many_ingredients.in*: 686,298,420
 * *d_many_pizzas.in*: 5,915,208
 * *e_many_teams.in*: 8,358,631
-* **total score**: 700,580,526
+* **total score**: **700,580,526**
 
+## Solution 2: Parallel post-processing
 
+This solution is similar to solution 1, but after the result is obtained, we go over the deliveries, and try to obtain a better score by swapping pizza i from one delivery
+with pizza j from another. For the bigger datasets this could take days, so this operation is done on **two threads** to achieve more in the same time. Also, this operation
+is set to stop after a certain time limit was exceeded(this time, I set it to 30 minutes).
+
+![p1](https://user-images.githubusercontent.com/79721547/130644709-8e8d0730-51a7-4728-a8a0-c18f2149c3a7.png)
+
+#### Score
+
+* *a_example.in*: 74
+* *b_little_bit_of_everything.in*: 9,097
+* *c_many_ingredients.in*: 693,570,291
+* *d_many_pizzas.in*: 6,469,059
+* *e_many_teams.in*: 9,168,995
+* **total score**: **709,217,516**
